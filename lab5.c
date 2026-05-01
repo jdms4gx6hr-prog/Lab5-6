@@ -1,5 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
+
 struct Node {
     int key;
     struct Node *left , *right;
@@ -129,6 +131,37 @@ struct Node* delete(struct Node* root , int key) {
     }
     return root;
 }
+int height(struct Node* root) {
+    if (root==NULL)
+        return 0;
+    int left_height=height(root->left);
+    int right_height=height(root->right);
+    if (left_height > right_height)
+        return (left_height+1);
+    else
+        return right_height+1;
+}
+void savetofile(struct Node* root , FILE* file) {
+    if (root==NULL) {
+        fprintf(file , "# ");
+        return;
+    }
+    fprintf(file ,"%d " , root->key);
+    savetofile(root->left , file);
+    savetofile(root->right,file);
+}
+struct Node* loadfromfile(FILE* file) {
+    char buffer[50];
+    if (fscanf(file , "%s" , buffer) !=1)
+        return NULL;
+    if (buffer[0] == '#')
+        return NULL;
+    struct Node* node=(struct Node*)malloc(sizeof(struct Node));
+    node->key = atoi(buffer);
+    node->left = loadfromfile(file);
+    node->right= loadfromfile(file);
+    return node;
+}
 int main() {
     struct Node* root=NULL;
     while (1) {
@@ -143,7 +176,10 @@ int main() {
             "8.Delete\n"
             "9.Find min element\n"
             "10.Find max element\n"
-            "11.Exit\n");
+            "11.Height\n"
+            "12.Save to file\n"
+            "13.Load from file\n"
+            "14.Exit\n");
         scanf("%d" , &choice);
         switch (choice) {
             case 1: {
@@ -230,8 +266,39 @@ int main() {
                 if (max!=NULL)
                     printf("Max= %d\n" , max->key);
                 break;
+            case 11:
+                int h = height(root);
+                printf("Height = %d\n" , h);
+                break;
+            case 12:
+                FILE* file = fopen("bst.txt" , "w");
+                savetofile(root , file);
+                fclose(file);
+                printf("Successful save!\n");
+                break;
+            case 13: {
+                char filename[100];
+                printf("Enter the name of your file:");
+                getchar();
+                fgets(filename,100,stdin);
+                filename[strcspn(filename,"\n")] = '\0';
+                FILE* file = fopen(filename,"r");
+                if (!file) {
+                    printf("Error opening file!\n");
+                    break;
+                }
+                root = loadfromfile(file);
+                if (root==NULL) {
+                    printf("Error!\n");
+                    break;
+                }
+                printf("BST: ");
+                preorder(root);
+                printf("\n");
+                break;
+            }
         }
-        if (choice==11)
+        if (choice==14)
             break;
     }
 }
