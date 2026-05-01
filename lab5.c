@@ -162,6 +162,13 @@ struct Node* loadfromfile(FILE* file) {
     node->right= loadfromfile(file);
     return node;
 }
+void free_tree(struct Node* root) {
+    if (root==NULL)
+        return;
+    free_tree(root->left);
+    free_tree(root->right);
+    free(root);
+}
 int main() {
     struct Node* root=NULL;
     while (1) {
@@ -179,7 +186,8 @@ int main() {
             "11.Height\n"
             "12.Save to file\n"
             "13.Load from file\n"
-            "14.Exit\n");
+            "14.Free BST and exit\n"
+            "15.Exit\n");
         scanf("%d" , &choice);
         switch (choice) {
             case 1: {
@@ -297,8 +305,13 @@ int main() {
                 printf("\n");
                 break;
             }
+            case 14:
+                free_tree(root);
+                root=NULL;
+                printf("Successful cleaning!");
+                exit(0);
         }
-        if (choice==14)
+        if (choice==15)
             break;
     }
 }
