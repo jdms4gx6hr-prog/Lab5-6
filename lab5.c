@@ -89,6 +89,46 @@ struct Node* search(struct Node* root , int key) {
     else
         return search(root->right , key);
 }
+struct Node* find_min(struct Node* node) {
+    while (node->left != NULL)
+        node = node->left;
+    return node;
+}
+struct Node* find_max(struct Node* node) {
+    while (node->right != NULL)
+        node = node->right;
+    return node;
+}
+struct Node* delete(struct Node* root , int key) {
+    if (root==NULL)
+        return root;
+    if (key<root->key)
+        root->left = delete(root->left , key);
+    else if (key>root->key)
+        root->right = delete(root->right , key);
+    else {
+        if (root->left == NULL && root->right == NULL) {
+            free(root);
+            return NULL;
+        }
+        if (root->left == NULL){
+            struct Node* temp = root->right;
+            free(root);
+            return temp;
+        }
+        else if (root->right == NULL) {
+            struct Node* temp = root->left;
+            free(root);
+            return temp;
+        }
+        if (root->left != NULL && root->right != NULL) {
+            struct Node* temp = find_min(root->right);
+            root->key = temp->key;
+            root->right = delete(root->right , temp->key);
+        }
+    }
+    return root;
+}
 int main() {
     struct Node* root=NULL;
     while (1) {
@@ -100,7 +140,10 @@ int main() {
             "5.Postorder(LRN)\n"
             "6.BFS\n"
             "7.Search\n"
-            "8.Exit\n");
+            "8.Delete\n"
+            "9.Find min element\n"
+            "10.Find max element\n"
+            "11.Exit\n");
         scanf("%d" , &choice);
         switch (choice) {
             case 1: {
@@ -167,8 +210,28 @@ int main() {
                     printf("Not found\n");
                 break;
             }
+            case 8:
+                int key;
+                printf("Enter your key:");
+                scanf("%d" , &key);
+                root = delete(root , key);
+                printf("Successful delete\n");
+                printf("BST after delete:\n");
+                inorder(root);
+                printf("\n");
+                break;
+            case 9:
+                struct Node* min = find_min(root);
+                if (min!=NULL)
+                    printf("Min = %d\n",min->key );
+                break;
+            case 10:
+                struct Node* max = find_max(root);
+                if (max!=NULL)
+                    printf("Max= %d\n" , max->key);
+                break;
         }
-        if (choice==8)
+        if (choice==11)
             break;
     }
 }
